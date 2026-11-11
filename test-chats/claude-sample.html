@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>RAG study notes - Claude</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 760px; margin: 0 auto; padding: 16px; background: #faf9f5; }
+    .banner { background: #fff3cd; padding: 8px; border-radius: 6px; font-family: system-ui, sans-serif; }
+    [data-testid="user-message"] { background: #eee8dd; border-radius: 12px; padding: 4px 12px; margin: 12px 0; }
+    .whitespace-pre-wrap { white-space: pre-wrap; }
+    pre { background: #222; color: #eee; padding: 8px; border-radius: 8px; }
+    td, th { border: 1px solid #aaa; padding: 4px; }
+    table { border-collapse: collapse; }
+  </style>
+</head>
+<body>
+  <p class="banner">Test page for Chat Saver: a fake <b>Claude-style</b> chat with 60 messages. Click the Chat Saver icon.</p>
+  <div id="thread"></div>
+
+  <script src="sample-data.js"></script>
+  <script>
+    // Claude puts the language label and Copy button OUTSIDE the <pre>, in a wrapper div.
+    function codeBlock(lang, code) {
+      return `<div class="relative flex flex-col rounded-lg">` +
+        `<div class="text-text-300 absolute pl-3 pt-2.5 text-xs">${lang}</div>` +
+        `<div class="pointer-events-none sticky"><div><button>Copy</button></div></div>` +
+        `<div class="overflow-x-auto"><pre class="code-block__code"><code class="language-${lang}">${highlight(code)}</code></pre></div>` +
+        `</div>`;
+    }
+    const thread = document.getElementById('thread');
+    for (let n = 1; n <= 30; n++) {
+      const paragraphs = question(n).split('\n').map(line => `<p class="whitespace-pre-wrap break-words">${esc(line)}</p>`).join('');
+      thread.insertAdjacentHTML('beforeend', `
+        <div data-testid="user-message">${paragraphs}</div>
+        <div class="font-claude-response"><div class="grid standard-markdown">${answer(n, codeBlock)}</div></div>
+        <div><button>Copy</button><button>Retry</button></div>`);
+    }
+  </script>
+</body>
+</html>

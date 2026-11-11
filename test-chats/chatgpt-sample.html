@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Explain RAG simply</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    .banner { background: #fff3cd; padding: 8px 16px; margin: 0; }
+    .thread-scroll-container { height: calc(100vh - 40px); overflow-y: auto; }
+    .turn { height: 1400px; overflow: hidden; max-width: 760px; margin: 0 auto; border-bottom: 1px dashed #ccc; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    [data-user-message-bubble] { background: #f0f0f0; border-radius: 12px; padding: 8px 12px; margin: 12px 0 12px 25%; }
+    .whitespace-pre-wrap { white-space: pre-wrap; }
+    pre { background: #222; color: #eee; padding: 8px; border-radius: 8px; }
+    td, th { border: 1px solid #aaa; padding: 4px; }
+    table { border-collapse: collapse; }
+    .loading { text-align: center; color: #888; padding: 8px; }
+  </style>
+</head>
+<body>
+  <p class="banner">Test page: fake <b>ChatGPT (2026 layout)</b> chat, 60 messages. Like the real site it only keeps nearby turns on the page,
+    fills answers in late, and loads older messages when you scroll to the top. Click the Chat Saver icon.</p>
+  <div class="thread-scroll-container"><div id="thread"></div></div>
+
+  <script src="sample-data.js"></script>
+  <script>
+    // Code block markup: label + Copy button inside the <pre> (as in ChatGPT's older layout).
+    function codeBlock(lang, code) {
+      return `<pre><div><div>${lang}</div><div><button>Copy code</button></div>` +
+        `<div><code class="language-${lang}">${highlight(code)}</code></div></div></pre>`;
+    }
+    // ChatGPT 2026 style: bold is a span with data-d-default-strong, math sits in a data-d-component="math" box,
+    // lessons can contain quiz radio buttons.
+    function newStyle(html, n) {
+      html = html.replace(/<strong>(.*?)<\/strong>/g, '<span data-d-text-flow data-d-component="text" data-d-default-strong data-d-inline>$1</span>')
+        .replace(MATH, '<span data-d-component="math">' + MATH + '</span>');
+      if (n % 4 === 0) html += `<p data-d-component="text">Quick check: what does RAG add?</p>
+        <div role="radiogroup" data-d-component="radio-group">
+          <div data-d-component="radio"><label><button role="radio" data-state="unchecked"></button>Retrieval</label></div>
+          <div data-d-component="radio"><label><button role="radio" data-state="unchecked"></button>Bigger GPUs</label></div>
+        </div><button data-d-component="button">Check my answers</button>`;
+      return html;
+    }
+    function turnHtml(n) {
+      return `
+        <div data-chatgpt-search-unit-key="fallback-turn-${n}:0:user" data-chatgpt-search-message-ids="user-${n}">
+          <h4 class="sr-only">You said:</h4>
+          <div data-user-message-bubble="true"><div class="whitespace-pre-wrap">${esc(question(n))}</div></div>
+        </div>
+        <div data-chatgpt-search-unit-key="fallback-turn-${n}:2:assistant" data-chatgpt-search-message-ids="answer-${n}">
+          <h4 class="sr-only">ChatGPT said:</h4>
+          <div data-markdown-copy="contents"><div data-dil-response></div></div>
+          <div><button>Copy</button><button>Good response</button></div>
+        </div>`;
+    }
+
+    // --- tiny "virtual list", like ChatGPT's ---
+    const box = document.querySelector('.thread-scroll-container');
+    const thread = document.getElementById('thread');
+    let oldest = 21; // turns 21..30 are loaded at first; 1..20 load when you scroll to the top
+    let loadingOlder = false;
+
+    function addTurns(from, to, atTop) {
+      const frag = document.createDocumentFragment();
+      for (let n = from; n <= to; n++) {
+        const t = document.createElement('div');
+        t.className = 'turn';
+        t.dataset.n = n;
+        frag.appendChild(t);
+      }
+      atTop ? thread.prepend(frag) : thread.append(frag);
+    }
+
+    function render() {
+      for (const t of thread.querySelectorAll('.turn')) {
+        const near = Math.abs(t.offsetTop - box.scrollTop) < 3000;   // only ~4-5 turns live on the page
+        if (near && !t.firstElementChild) {
+          const n = Number(t.dataset.n);
+          t.innerHTML = turnHtml(n);
+          const body = t.querySelector('[data-dil-response]');
+          setTimeout(() => { if (body.isConnected) body.innerHTML = newStyle(answer(n, codeBlock), n); }, 150); // filled in late
+        } else if (!near && t.firstElementChild) {
+          t.innerHTML = '';
+        }
+      }
+      if (box.scrollTop < 50 && oldest > 1 && !loadingOlder) {
+        loadingOlder = true;
+        const msg = document.createElement('div');
+        msg.className = 'loading';
+        msg.textContent = 'Loading older messages…';
+        thread.prepend(msg);
+        setTimeout(() => {
+          msg.remove();
+          const from = Math.max(1, oldest - 10);
+          addTurns(from, oldest - 1, true);
+          box.scrollTop += (oldest - from) * 1400;
+          oldest = from;
+          loadingOlder = false;
+          render();
+        }, 500);
+      }
+    }
+
+    addTurns(21, 30, false);
+    box.addEventListener('scroll', render);
+    box.scrollTop = box.scrollHeight; // open at the bottom, like a real chat
+    render();
+  </script>
+</body>
+</html>

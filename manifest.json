@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Chat Saver",
+  "version": "1.0",
+  "description": "Save an AI chat (ChatGPT or Claude) as clean Markdown or PDF. Works offline, sends nothing anywhere.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": {
+    "default_title": "Save this chat",
+    "default_popup": "popup.html"
+  }
+}

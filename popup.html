@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Chat Saver</title>
+  <style>
+    body { width: 340px; margin: 0; padding: 12px; font: 13px system-ui, sans-serif; color: #1f2328; }
+    h1 { font-size: 15px; margin: 0 0 8px; }
+    .title { font-weight: 600; margin: 0 0 8px; }
+    .stats { display: flex; gap: 6px; margin-bottom: 8px; }
+    .stats div { flex: 1; background: #f3f4f6; border-radius: 6px; padding: 6px; text-align: center; font-size: 11px; color: #555; }
+    .stats b { display: block; font-size: 17px; color: #1f2328; }
+    #list { list-style: none; margin: 6px 0 10px; padding: 0; max-height: 260px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; }
+    #list li { border-bottom: 1px solid #eee; }
+    #list label { display: flex; gap: 6px; padding: 5px 6px; cursor: pointer; }
+    #list .who { font-weight: 600; min-width: 58px; flex-shrink: 0; }
+    #list .who.user { color: #0a58ca; }
+    #list .preview { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #444; }
+    button { width: 100%; padding: 8px; margin-top: 6px; border: 0; border-radius: 6px; font-size: 13px; cursor: pointer; background: #1f2328; color: #fff; }
+    button.light { background: #e5e7eb; color: #1f2328; }
+    button:disabled { opacity: 0.4; cursor: default; }
+    #status { color: #555; margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <h1>Chat Saver</h1>
+  <p id="status">Reading this chat… On ChatGPT it scrolls through the whole chat to load every message, so keep this window open. A long chat can take up to a minute.</p>
+
+  <div id="main" hidden>
+    <p class="title" id="title"></p>
+    <div class="stats">
+      <div><b id="nMsgs">0</b>Messages</div>
+      <div><b id="nCode">0</b>Code blocks</div>
+      <div><b id="nTables">0</b>Tables</div>
+    </div>
+    <label><input type="checkbox" id="all" checked> Select all</label>
+    <ul id="list"></ul>
+    <button id="pdf">Save as PDF</button>
+    <button id="md" class="light">Save as Markdown</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
