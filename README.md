@@ -1,4 +1,4 @@
-# Chat Saver (Project 12)
+# Chat Saver 
 
 A Chrome/Brave extension that saves an AI chat from **ChatGPT** or **Claude** as a clean **Markdown** or **PDF** file in one click.
 It keeps headings, lists, tables and code blocks, names the file from the chat's title, and **sends nothing to any server**.
